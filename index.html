@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>tick analyzer</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tick Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .dropdowns, .stake-section, .buttons {
+            margin: 10px 0;
+        }
+        select, input[type="number"], button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .number-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .number-buttons button {
+            width: 40px;
+            height: 40px;
+            background-color: lightgreen;
+            border: 1px solid lightcoral;
+            color: #333;
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .number-buttons button.active {
+            background-color: lightcoral;
+        }
+        #reset {
+            background-color: lightblue;
+            color: black;
+        }
+        #result {
+            font-size: 1.2rem;
+            color: green;
+            margin: 10px 0;
+        }
+        .purchase-buttons button {
+            width: 100px;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+        }
+        #red-purchase {
+            background-color: lightcoral;
+        }
+        #green-purchase {
+            background-color: lightgreen;
+        }
+        #red-purchase.solid {
+            background-color: red;
+        }
+        #green-purchase.solid {
+            background-color: darkgreen;
+        }
+        .candles {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Align candles at the bottom */
+            height: 100px; /* Fixed height for the candles container */
+            gap: 10px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .candle {
+            width: 20px;
+            height: 50px;
+            background-color: lightgreen;
+            animation: flicker 1s infinite alternate;
+        }
+        .candle.red {
+            background-color: lightcoral;
+        }
+        @keyframes flicker {
+            to {
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Tick Analyzer</div>
+        
+        <!-- Market & Trade Type Dropdowns -->
+        <div class="dropdowns">
+            <label>Market: 
+                <select id="market">
+                    <option value="v10">Volatility 10</option>
+                    <option value="v25">Volatility 25</option>
+                    <option value="v50">Volatility 50</option>
+                    <option value="v75">Volatility 75</option>
+                    <option value="v100">Volatility 100</option>
+                </select>
+            </label>
+            <label>Trade Type: 
+                <select id="trade-type">
+                    <option value="rise-fall">Rise / Fall</option>
+                    <option value="over-under">Over / Under</option>
+                    <option value="higher-lower">Higher / Lower</option>
+                    <option value="touch-no-touch">Touch / No Touch</option>
+                </select>
+            </label>
+        </div>
+
+        <!-- Stake Section -->
+        <div class="stake-section">
+            <label>Stake: 
+                <input type="number" id="stake" placeholder="Enter amount">
+            </label>
+        </div>
+
+        <!-- Purchase Buttons -->
+        <div class="purchase-buttons">
+            <button id="red-purchase">Purchase</button>
+            <button id="green-purchase">Purchase</button>
+        </div>
+
+        <!-- Candles -->
+        <div class="candles">
+            <div class="candle"></div>
+            <div class="candle red"></div>
+        </div>
+
+        <!-- Number Buttons -->
+        <div class="number-buttons" id="number-buttons">
+            <!-- Buttons 0-9 -->
+            <script>
+                for (let i = 0; i < 10; i++) {
+                    document.write(`<button onclick="handleNumber(${i})">${i}</button>`);
+                }
+            </script>
+        </div>
+
+        <!-- Result Display -->
+        <div id="result">Result: -</div>
+        
+        <!-- Reset Button -->
+        <div>
+            <button id="reset" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let clickHistory = [];
+
+        function handleNumber(number) {
+            clickHistory.push(number);
+            if (clickHistory.length > 3) clickHistory.shift(); // Keep only last 3
+            updateResult();
+        }
+
+        function updateResult() {
+            const resultElement = document.getElementById("result");
+            const redButton = document.getElementById("red-purchase");
+            const greenButton = document.getElementById("green-purchase");
+            
+            if (clickHistory.length === 3) {
+                const isUnder = clickHistory.every(num => num >= 5 && num <= 9);
+                const isOver = clickHistory.every(num => num >= 0 && num <= 5);
+                
+                if (isUnder) {
+                    resultElement.textContent = "Result: Under";
+                    redButton.classList.add("solid");
+                    greenButton.classList.remove("solid");
+                } else if (isOver) {
+                    resultElement.textContent = "Result: Over";
+                    greenButton.classList.add("solid");
+                    redButton.classList.remove("solid");
+                } else {
+                    resultElement.textContent = "Result: -";
+                    redButton.classList.remove("solid");
+                    greenButton.classList.remove("solid");
+                }
+            }
+        }
+
+        function resetGame() {
+            clickHistory = [];
+            document.getElementById("result").textContent = "Result: -";
+            document.getElementById("red-purchase").classList.remove("solid");
+            document.getElementById("green-purchase").classList.remove("solid");
+        }
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
